@@ -1,5 +1,5 @@
 import Button from '../components/Button';
-import ReyPicture from '../assets/ReyPicture.JPG';
+import ReyPic from '../assets/ReyPicture.JPG';
 
 const education = [
   'Junior at National University - Manila',
@@ -17,9 +17,9 @@ const AboutPage = () => {
           <div className="rounded-3xl border-2 border-dashed border-zinc-300 bg-zinc-100 p-6">
             <div className="flex items-center justify-center rounded-[1.25rem] bg-zinc-200 p-3">
               <img
-                src={ReyPicture}
+                src={ReyPic}
                 alt="Reynald Quijano"
-                className="h-auto w-full rounded-2xl border-2 border-zinc-300 object-contain bg-zinc-50"
+                className="h-80 w-56 rounded-2xl border-2 border-zinc-300 object-cover object-top bg-zinc-50 sm:h-96 sm:w-64"
               />
             </div>
           </div>

@@ -1,5 +1,4 @@
 import { NavLink } from 'react-router-dom';
-import RLogo from '../assets/RLogo.png';
 
 const links = [
   { label: 'Home', to: '/' },
@@ -20,7 +19,9 @@ const NavBar = () => {
     <header className="fixed inset-x-0 top-0 z-50 border-b-2 border-zinc-900 bg-zinc-100/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
         <NavLink to="/" className="flex items-center gap-3">
-          <img src={RLogo} alt="R Logo" className="h-12 w-auto object-contain" />
+          <div className="grid h-11 w-11 place-items-center rounded-xl border-2 border-zinc-900 bg-zinc-900 text-zinc-50 shadow-sm">
+            <span className="text-sm font-black tracking-widest">RQ</span>
+          </div>
           <div className="space-y-0.5">
             <p className="text-sm font-black uppercase tracking-[0.22em] text-zinc-900">Rey Quijano</p>
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">Web Portfolio</p>

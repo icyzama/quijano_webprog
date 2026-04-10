@@ -1,10 +1,10 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-
-// HomePage Structure
 import Layout from './components/Layout';
+import AboutPage from './pages/AboutPage';
+import ArticleListPage from './pages/ArticleListPage';
 import ArticlePage from './pages/ArticlePage';
 import HomePage from './pages/HomePage';
-import AboutPage from './pages/AboutPage';
+import NotFoundPage from './pages/NotFoundPage';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 const routes = [
   {
@@ -12,28 +12,34 @@ const routes = [
     element: <Layout />,
     children: [
       {
-        path: '',
-        element: <HomePage />,
+        index: true,
+        element: <HomePage />
       },
       {
         path: 'about',
-        element: <AboutPage />,
+        element: <AboutPage />
       },
       {
         path: 'articles',
-        element: <ArticlePage />,
+        element: <ArticleListPage />
       },
-    ],
-  },
+      {
+        path: 'articles/:name',
+        element: <ArticlePage />
+      },
+      {
+        path: '*',
+        element: <NotFoundPage />
+      }
+    ]
+  }
 ];
 
 const router = createBrowserRouter(routes);
 
 function App() {
   return (
-    <>
-      <RouterProvider router={router} />
-    </>
+    <RouterProvider router={router} />
   );
 }
 
