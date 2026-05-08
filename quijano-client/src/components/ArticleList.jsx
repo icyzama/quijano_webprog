@@ -2,15 +2,14 @@ import { useMemo } from 'react';
 import Button from './Button';
 
 const ArticleList = ({ articles }) => {
-  const shuffledArticles = useMemo(() => {
+  const sortedArticles = useMemo(() => {
     const copy = [...articles];
-    copy.sort(() => Math.random() - 0.5);
-    return copy;
+    return copy.sort((a, b) => a.title.localeCompare(b.title));
   }, [articles]);
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {shuffledArticles.map((article, index) => (
+      {sortedArticles.map((article, index) => (
         <article key={article.name} className="rounded-3xl border-2 border-zinc-900 bg-zinc-100 p-4">
           <div className="overflow-hidden rounded-[1.25rem] border-2 border-zinc-300 bg-zinc-200">
             <img src={article.image} alt={article.title} className="aspect-4/3 w-full object-cover" />

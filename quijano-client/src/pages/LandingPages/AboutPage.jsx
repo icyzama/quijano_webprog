@@ -1,5 +1,5 @@
-import Button from '../components/Button';
-import ReyPic from '../assets/ReyPicture.JPG';
+import Button from '../../components/Button';
+import ReyPic from '../../assets/ReyPicture.JPG';
 
 const education = [
   'Junior at National University - Manila',

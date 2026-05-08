@@ -1,5 +1,5 @@
-import Button from '../components/Button';
-import HomeCover from '../assets/HomeCover.png';
+import Button from '../../components/Button';
+import HomeCover from '../../assets/HomeCover.png';
 
 const highlights = [
   {

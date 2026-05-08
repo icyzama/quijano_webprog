@@ -34,6 +34,20 @@ const NavBar = () => {
               {link.label}
             </NavLink>
           ))}
+          <div className="ml-4 flex items-center gap-2 pl-4 border-l-2 border-zinc-300">
+            <NavLink 
+              to="/auth/signin" 
+              className="rounded-full border-2 border-zinc-300 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-700 transition hover:border-zinc-900 hover:bg-zinc-50 hover:text-zinc-900"
+            >
+              Sign In
+            </NavLink>
+            <NavLink 
+              to="/auth/signup" 
+              className="rounded-full border-2 border-zinc-900 bg-zinc-900 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-50 transition hover:bg-zinc-800"
+            >
+              Sign Up
+            </NavLink>
+          </div>
         </nav>
       </div>
     </header>
