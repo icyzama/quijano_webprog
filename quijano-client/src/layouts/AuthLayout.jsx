@@ -1,11 +1,8 @@
-import { Outlet, useLocation } from 'react-router-dom';
-import Developer2Image from '../assets/developer2.png';
-import DeveloperImage from '../assets/Developer.png';
+import { Outlet } from 'react-router-dom';
+import DeveloperImage from '../assets/developer2.png';
 
 const AuthLayout = () => {
-  const location = useLocation();
-  const isSignIn = location.pathname === '/auth/signin';
-  const image = isSignIn ? Developer2Image : DeveloperImage;
+  const image = DeveloperImage;
 
   return (
     <section className="min-h-screen bg-zinc-100 text-zinc-900">
@@ -14,7 +11,7 @@ const AuthLayout = () => {
           <div className="flex w-full h-full items-center justify-center rounded-[2rem] border-2 border-dashed border-zinc-300 bg-zinc-100/60 p-4 sm:p-6">
             <img 
               src={image} 
-              alt={isSignIn ? "Developer workspace and coding environment" : "Developer working and coding"} 
+              alt="Developer workspace and coding environment" 
               className="w-full h-full object-cover rounded-2xl border-2 border-zinc-300 shadow-lg"
             />
           </div>
