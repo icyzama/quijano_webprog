@@ -1,382 +1,320 @@
-import React from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Paper,
-  Stack,
-  Button,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip,
-  Avatar,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
-  Divider,
-  Tabs,
-  Tab
-} from '@mui/material';
-import {
-  Download,
-  Refresh,
-  TrendingUp,
-  TrendingDown,
-  Assessment,
-  Timeline,
-  PieChart as PieChartIcon,
-  BarChart as BarChartIcon
-} from '@mui/icons-material';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  AreaChart,
-  Area,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar
-} from 'recharts';
+﻿import { useMemo, useRef } from 'react';
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import { BarChart } from "@mui/x-charts/BarChart";
+import { Gauge } from "@mui/x-charts/Gauge";
+import { PieChart } from "@mui/x-charts/PieChart";
+import { DataGrid } from "@mui/x-data-grid";
+import usersSeed from '../../assets/users.json?raw';
+
+const loadUsers = () => {
+  try {
+    return JSON.parse(usersSeed).map((user, index) => ({
+      id: Number(user.id) || index + 1,
+      firstName: String(user.firstName ?? '').trim(),
+      lastName: String(user.lastName ?? '').trim(),
+      age: Number(String(user.age ?? '').trim()) || 0,
+      gender: String(user.gender ?? '').trim().toLowerCase(),
+      contactNumber: String(user.contactNumber ?? '').trim(),
+      email: String(user.email ?? '').trim().toLowerCase(),
+      role: String(user.role ?? '').trim().toLowerCase(),
+      isActive: typeof user.isActive === 'boolean' ? user.isActive : true,
+    }));
+  } catch {
+    return [];
+  }
+};
+
+const columns = [
+  { field: 'id', headerName: 'ID', width: 90 },
+  { field: 'firstName', headerName: 'First name', width: 150 },
+  { field: 'lastName', headerName: 'Last name', width: 150 },
+  { field: 'age', headerName: 'Age', type: 'number', width: 110 },
+  {
+    field: 'fullName',
+    headerName: 'Full name',
+    description: 'This column has a value getter and is not sortable.',
+    sortable: false,
+    width: 160,
+    valueGetter: (params) => `${params.row?.firstName ?? ''} ${params.row?.lastName ?? ''}`.trim(),
+  },
+  { field: 'gender', headerName: 'Gender', width: 120 },
+  { field: 'contactNumber', headerName: 'Contact Number', width: 160 },
+  { field: 'email', headerName: 'Email', flex: 1, minWidth: 220 },
+  {
+    field: 'role',
+    headerName: 'Role',
+    width: 120,
+  },
+  {
+    field: 'status',
+    headerName: 'Status',
+    width: 120,
+    sortable: false,
+    valueGetter: (params) => (params.row?.isActive ? 'Active' : 'Inactive'),
+  },
+];
 
 const ReportsPage = () => {
-  const [timeRange, setTimeRange] = React.useState('month');
-  const [tabValue, setTabValue] = React.useState(0);
+  const printRef = useRef(null);
+  const users = useMemo(loadUsers, []);
+  const totalUsers = users.length;
+  const activeUsers = users.filter((user) => user.isActive).length;
+  const averageAge = users.length
+    ? Number((users.reduce((sum, user) => sum + user.age, 0) / users.length).toFixed(1))
+    : 0;
 
-  // Mock data for various charts
-  const trafficData = [
-    { month: 'Jan', visitors: 4000, pageViews: 12000, bounceRate: 45 },
-    { month: 'Feb', visitors: 3500, pageViews: 10500, bounceRate: 48 },
-    { month: 'Mar', visitors: 5200, pageViews: 15600, bounceRate: 42 },
-    { month: 'Apr', visitors: 6800, pageViews: 20400, bounceRate: 38 },
-    { month: 'May', visitors: 5500, pageViews: 16500, bounceRate: 40 },
-    { month: 'Jun', visitors: 7200, pageViews: 21600, bounceRate: 35 },
+  const roleLabels = ['admin', 'editor', 'viewer'];
+  const roleCounts = roleLabels.map(
+    (role) => users.filter((user) => user.role === role).length
+  );
+
+  const genderData = [
+    { id: 0, value: users.filter((user) => user.gender === 'female').length, label: 'Female' },
+    { id: 1, value: users.filter((user) => user.gender === 'male').length, label: 'Male' },
+    { id: 2, value: users.filter((user) => user.gender === 'other').length, label: 'Other' },
   ];
 
-  const contentPerformance = [
-    { name: 'Blog Posts', views: 4500, engagement: 78, shares: 234 },
-    { name: 'Portfolio', views: 3200, engagement: 85, shares: 189 },
-    { name: 'Articles', views: 2800, engagement: 72, shares: 156 },
-    { name: 'About Page', views: 2100, engagement: 65, shares: 98 },
-    { name: 'Contact', views: 1800, engagement: 58, shares: 76 },
-  ];
+  const activeRate = users.length ? Math.round((activeUsers / users.length) * 100) : 0;
 
-  const deviceAnalytics = [
-    { name: 'Desktop', value: 45, color: '#8884d8', users: 3240 },
-    { name: 'Mobile', value: 35, color: '#82ca9d', users: 2520 },
-    { name: 'Tablet', value: 20, color: '#ffc658', users: 1440 },
-  ];
+  const reportRows = users.map((user) => ({
+    ...user,
+    fullName: `${user.firstName} ${user.lastName}`.trim(),
+    status: user.isActive ? 'Active' : 'Inactive',
+  }));
 
-  const performanceMetrics = [
-    { subject: 'Load Time', A: 85, fullMark: 100 },
-    { subject: 'SEO Score', A: 92, fullMark: 100 },
-    { subject: 'User Experience', A: 88, fullMark: 100 },
-    { subject: 'Content Quality', A: 95, fullMark: 100 },
-    { subject: 'Mobile Friendly', A: 90, fullMark: 100 },
-    { subject: 'Accessibility', A: 78, fullMark: 100 },
-  ];
+  const handlePrint = () => {
+    const printContent = printRef.current;
+    if (!printContent) return;
 
-  const topPages = [
-    { page: '/portfolio', views: 3420, change: '+12%', trend: 'up' },
-    { page: '/about', views: 2890, change: '+8%', trend: 'up' },
-    { page: '/articles/react-guide', views: 2156, change: '-3%', trend: 'down' },
-    { page: '/contact', views: 1876, change: '+15%', trend: 'up' },
-    { page: '/articles/portfolio-tips', views: 1654, change: '+5%', trend: 'up' },
-  ];
+    const printWindow = window.open('', '_blank', 'width=1200,height=900');
+    if (!printWindow) return;
 
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
+    const headMarkup = Array.from(
+      document.querySelectorAll('style, link[rel="stylesheet"]')
+    )
+      .map((node) => node.outerHTML)
+      .join('');
+
+    const exportedAt = new Intl.DateTimeFormat('en-US', {
+      dateStyle: 'long',
+      timeStyle: 'short',
+    }).format(new Date());
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Print Report</title>
+        ${headMarkup}
+        <style>
+          @page {
+            size: A4;
+            margin: 16mm;
+          }
+          * {
+            box-sizing: border-box;
+          }
+          body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #fff;
+            color: #1f2937;
+          }
+          .report-shell {
+            padding: 28px;
+          }
+          .report-header {
+            margin-bottom: 24px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid #d1d5db;
+          }
+          .report-header h1 {
+            margin: 0 0 6px;
+            font-size: 28px;
+            font-weight: 700;
+          }
+          .report-header p {
+            margin: 0;
+            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.5;
+          }
+          .report-content .MuiCard-root {
+            box-shadow: none !important;
+            border: 1px solid #e5e7eb;
+            break-inside: avoid;
+            page-break-inside: avoid;
+            margin-bottom: 20px;
+          }
+          .report-content .MuiCardContent-root {
+            padding: 20px;
+          }
+          .report-content svg {
+            max-width: 100%;
+          }
+        </style>
+      </head>
+      <body>
+        <main class="report-shell">
+          <header class="report-header">
+            <h1>Reports Summary</h1>
+            <p>Analytics overview for generated reports, category breakdown, and completion performance.</p>
+            <p>Prepared on ${exportedAt}</p>
+          </header>
+          <section class="report-content">
+            ${printContent.outerHTML}
+          </section>
+        </main>
+      </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+    }, 250);
   };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold', color: '#111827' }}>
-          Analytics & Reports
-        </Typography>
-        <Stack direction="row" spacing={2}>
-          <FormControl size="small" sx={{ minWidth: 120 }}>
-            <InputLabel>Time Range</InputLabel>
-            <Select
-              value={timeRange}
-              label="Time Range"
-              onChange={(e) => setTimeRange(e.target.value)}
-            >
-              <MenuItem value="week">Last Week</MenuItem>
-              <MenuItem value="month">Last Month</MenuItem>
-              <MenuItem value="quarter">Last Quarter</MenuItem>
-              <MenuItem value="year">Last Year</MenuItem>
-            </Select>
-          </FormControl>
-          <Button variant="outlined" startIcon={<Refresh />}>
-            Refresh
-          </Button>
-          <Button variant="contained" startIcon={<Download />}>
-            Export Report
-          </Button>
+    <Box>
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        spacing={2}
+        sx={{
+          mb: 4,
+          justifyContent: 'space-between',
+          alignItems: { xs: 'flex-start', md: 'center' },
+          flexWrap: 'wrap',
+        }}
+      >
+        <Box>
+          <Typography variant="h4" gutterBottom>
+            Reports
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Report analytics overview showing generated reports, category breakdown, and current completion performance.
+          </Typography>
+        </Box>
+        <Stack
+          direction="row"
+          spacing={1.5}
+          sx={{ flexWrap: 'wrap', gap: 1.5 }}
+        >
+          <Button variant="contained">Generate</Button>
+          <Button variant="outlined" onClick={handlePrint}>Export</Button>
+          <Button variant="outlined">Filter</Button>
         </Stack>
-      </Box>
+      </Stack>
 
-      {/* Summary Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ bgcolor: '#f3f4f6', border: '1px solid #e5e7eb' }}>
+      <Stack ref={printRef} spacing={3}>
+        <Card>
+          <CardContent>
+            <Typography variant="h6" gutterBottom>
+              Monthly Report Output
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              User counts are broken down across roles to help track how many administrators, editors, and viewers are present in the system.
+            </Typography>
+            <BarChart
+              series={[
+                { data: roleCounts, label: 'Users' },
+              ]}
+              width={620}
+              height={320}
+              xAxis={[
+                {
+                  data: ['Admin', 'Editor', 'Viewer'],
+                  scaleType: 'band',
+                  label: 'Role',
+                },
+              ]}
+            />
+          </CardContent>
+        </Card>
+
+        <Stack direction={{ xs: 'column', lg: 'row' }} spacing={3}>
+          <Card sx={{ flex: 1 }}>
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Avatar sx={{ bgcolor: '#8884d8', mr: 2 }}>
-                  <TrendingUp />
-                </Avatar>
-                <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    Total Visitors
-                  </Typography>
-                  <Typography variant="h4" component="p" sx={{ fontWeight: 'bold', color: '#111827' }}>
-                    24,200
-                  </Typography>
-                </Box>
+              <Typography variant="h6" gutterBottom>
+                Gender Breakdown
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                This chart shows the gender distribution of the imported user dataset.
+              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                <PieChart
+                  series={[
+                    {
+                      data: genderData,
+                    },
+                  ]}
+                  width={280}
+                  height={220}
+                />
               </Box>
-              <Chip label="+18% from last month" color="success" size="small" />
             </CardContent>
           </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ bgcolor: '#f3f4f6', border: '1px solid #e5e7eb' }}>
+
+          <Card sx={{ flex: 1 }}>
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Avatar sx={{ bgcolor: '#82ca9d', mr: 2 }}>
-                  <Assessment />
-                </Avatar>
-                <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    Page Views
-                  </Typography>
-                  <Typography variant="h4" component="p" sx={{ fontWeight: 'bold', color: '#111827' }}>
-                    86,400
-                  </Typography>
-                </Box>
+              <Typography variant="h6" gutterBottom>
+                Active User Rate
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                The gauge shows the percentage of users currently marked as active in the imported dataset.
+              </Typography>
+              <Box
+                sx={{
+                  minHeight: 220,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Gauge width={180} height={180} value={activeRate} />
               </Box>
-              <Chip label="+25% from last month" color="success" size="small" />
             </CardContent>
           </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ bgcolor: '#f3f4f6', border: '1px solid #e5e7eb' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Avatar sx={{ bgcolor: '#ffc658', mr: 2 }}>
-                  <Timeline />
-                </Avatar>
-                <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    Avg. Session
-                  </Typography>
-                  <Typography variant="h4" component="p" sx={{ fontWeight: 'bold', color: '#111827' }}>
-                    4m 32s
-                  </Typography>
-                </Box>
-              </Box>
-              <Chip label="-5% from last month" color="warning" size="small" />
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ bgcolor: '#f3f4f6', border: '1px solid #e5e7eb' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Avatar sx={{ bgcolor: '#ff7c7c', mr: 2 }}>
-                  <PieChartIcon />
-                </Avatar>
-                <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    Bounce Rate
-                  </Typography>
-                  <Typography variant="h4" component="p" sx={{ fontWeight: 'bold', color: '#111827' }}>
-                    38.2%
-                  </Typography>
-                </Box>
-              </Box>
-              <Chip label="-8% from last month" color="success" size="small" />
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+        </Stack>
 
-      {/* Tabs for different report sections */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tabs value={tabValue} onChange={handleTabChange}>
-          <Tab label="Traffic Analysis" />
-          <Tab label="Content Performance" />
-          <Tab label="Device Analytics" />
-          <Tab label="Performance Metrics" />
-        </Tabs>
-      </Box>
-
-      {/* Tab Content */}
-      {tabValue === 0 && (
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={8}>
-            <Paper sx={{ p: 2, height: 400 }}>
-              <Typography variant="h6" component="h2" gutterBottom>
-                Traffic Overview
+        <Card>
+          <CardContent>
+            <Box sx={{ mb: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              <Typography variant="body2" sx={{ minWidth: 150 }}>
+                Total users: <strong>{totalUsers}</strong>
               </Typography>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={trafficData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip />
-                  <Area type="monotone" dataKey="visitors" stackId="1" stroke="#8884d8" fill="#8884d8" />
-                  <Area type="monotone" dataKey="pageViews" stackId="1" stroke="#82ca9d" fill="#82ca9d" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Paper sx={{ p: 2, height: 400 }}>
-              <Typography variant="h6" component="h2" gutterBottom>
-                Top Pages
+              <Typography variant="body2" sx={{ minWidth: 150 }}>
+                Active users: <strong>{activeUsers}</strong>
               </Typography>
-              <List sx={{ maxHeight: 320, overflow: 'auto' }}>
-                {topPages.map((page, index) => (
-                  <Box key={index}>
-                    <ListItem sx={{ px: 0 }}>
-                      <ListItemText
-                        primary={page.page}
-                        secondary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography variant="body2" color="text.primary">
-                              {page.views.toLocaleString()} views
-                            </Typography>
-                            <Chip 
-                              label={page.change} 
-                              size="small" 
-                              color={page.trend === 'up' ? 'success' : 'error'}
-                            />
-                          </Box>
-                        }
-                      />
-                    </ListItem>
-                    {index < topPages.length - 1 && <Divider />}
-                  </Box>
-                ))}
-              </List>
-            </Paper>
-          </Grid>
-        </Grid>
-      )}
-
-      {tabValue === 1 && (
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <Paper sx={{ p: 2, height: 400 }}>
-              <Typography variant="h6" component="h2" gutterBottom>
-                Content Performance
+              <Typography variant="body2" sx={{ minWidth: 150 }}>
+                Average age: <strong>{averageAge}</strong>
               </Typography>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={contentPerformance}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="views" fill="#8884d8" />
-                  <Bar dataKey="engagement" fill="#82ca9d" />
-                  <Bar dataKey="shares" fill="#ffc658" />
-                </BarChart>
-              </ResponsiveContainer>
-            </Paper>
-          </Grid>
-        </Grid>
-      )}
-
-      {tabValue === 2 && (
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <Paper sx={{ p: 2, height: 400 }}>
-              <Typography variant="h6" component="h2" gutterBottom>
-                Device Distribution
-              </Typography>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={deviceAnalytics}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, value }) => `${name}: ${value}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {deviceAnalytics.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Paper sx={{ p: 2, height: 400 }}>
-              <Typography variant="h6" component="h2" gutterBottom>
-                Device Users
-              </Typography>
-              <List>
-                {deviceAnalytics.map((device, index) => (
-                  <ListItem key={index}>
-                    <ListItemAvatar>
-                      <Avatar sx={{ bgcolor: device.color }}>
-                        {device.name.charAt(0)}
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={device.name}
-                      secondary={`${device.users.toLocaleString()} users (${device.value}%)`}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </Paper>
-          </Grid>
-        </Grid>
-      )}
-
-      {tabValue === 3 && (
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <Paper sx={{ p: 2, height: 500 }}>
-              <Typography variant="h6" component="h2" gutterBottom>
-                Performance Metrics
-              </Typography>
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart data={performanceMetrics}>
-                  <PolarGrid />
-                  <PolarAngleAxis dataKey="subject" />
-                  <PolarRadiusAxis angle={90} domain={[0, 100]} />
-                  <Radar name="Score" dataKey="A" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-                  <Tooltip />
-                </RadarChart>
-              </ResponsiveContainer>
-            </Paper>
-          </Grid>
-        </Grid>
-      )}
+            </Box>
+            <DataGrid
+              rows={reportRows}
+              columns={columns}
+              experimentalFeatures={{ newEditingApi: true }}
+              initialState={{
+                pagination: {
+                  paginationModel: { pageSize: 5 },
+                },
+              }}
+              pageSizeOptions={[5]}
+              checkboxSelection
+              disableRowSelectionOnClick
+              autoHeight
+            />
+          </CardContent>
+        </Card>
+      </Stack>
     </Box>
   );
 };
