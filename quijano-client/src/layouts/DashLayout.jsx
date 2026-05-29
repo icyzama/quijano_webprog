@@ -18,6 +18,7 @@ import {
   Dashboard,
   Assessment,
   People,
+  Article,
   Menu,
   ChevronLeft
 } from '@mui/icons-material';
@@ -36,11 +37,21 @@ function DashLayout() {
     setOpen(true);
   };
 
-  const menuItems = [
+  const currentType = typeof window !== 'undefined' ? localStorage.getItem('type') : null;
+
+  const dashboardItems = [
     { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
     { text: 'Reports', icon: <Assessment />, path: '/dashboard/reports' },
+    { text: 'Articles', icon: <Article />, path: '/dashboard/articles' },
     { text: 'Users', icon: <People />, path: '/dashboard/users' },
   ];
+
+  const menuItems = dashboardItems.filter((item) => {
+    if (item.text === 'Users' && currentType !== 'admin') {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <Box sx={{ display: 'flex' }}>

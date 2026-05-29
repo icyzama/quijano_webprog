@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import Layout from './layouts/Layout';
 import ArticlePage from './pages/LandingPages/ArticlePage';
 import HomePage from './pages/LandingPages/HomePage';
@@ -12,6 +12,7 @@ import DashLayout from './layouts/DashLayout';
 import DashboardPage from './pages/DashboardPages/DashboardPage';
 import ReportsPage from './pages/DashboardPages/ReportsPage';
 import UsersPage from './pages/DashboardPages/UsersPage';
+import DashArticleListPage from './pages/DashboardPages/DashArticleListPage';
 
 const routes = [
   {
@@ -19,7 +20,7 @@ const routes = [
     element: <Layout />,
     errorElement: <NotFoundPage />,
     children: [
-      { path: '', element: <HomePage /> },
+      { path: '', element: <Navigate to="/auth/signin" replace /> },
       { path: 'about', element: <AboutPage /> },
       { path: 'articles', element: <ArticleListPage /> },
       { path: 'articles/:name', element: <ArticlePage /> },
@@ -41,6 +42,7 @@ const routes = [
     children: [
       { path: "", element: <DashboardPage /> }, // Enhancement 1
       { path: "reports", element: <ReportsPage /> }, // Enhancement 2
+      { path: "articles", element: <DashArticleListPage /> },
       { path: "users", element: <UsersPage /> }, // Enhancement 3
     ],
   },
