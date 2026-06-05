@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Drawer,
@@ -12,7 +12,8 @@ import {
   ListItemIcon,
   ListItemText,
   IconButton,
-  Avatar
+  Avatar,
+  Button
 } from '@mui/material';
 import {
   Dashboard,
@@ -22,12 +23,13 @@ import {
   Menu,
   ChevronLeft
 } from '@mui/icons-material';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, useNavigate } from 'react-router-dom';
 
 const drawerWidth = 240;
 
 function DashLayout() {
   const [open, setOpen] = useState(true);
+  const navigate = useNavigate();
 
   const handleDrawerClose = () => {
     setOpen(false);
@@ -37,7 +39,25 @@ function DashLayout() {
     setOpen(true);
   };
 
+  const handleLogout = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+      localStorage.removeItem('firstName');
+      localStorage.removeItem('type');
+    }
+    navigate('/auth/signin');
+  };
+
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   const currentType = typeof window !== 'undefined' ? localStorage.getItem('type') : null;
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (!token || currentType === 'viewer') {
+        navigate('/auth/signin');
+      }
+    }
+  }, [token, currentType, navigate]);
 
   const dashboardItems = [
     { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
@@ -77,6 +97,9 @@ function DashLayout() {
             Dashboard
           </Typography>
           <Box sx={{ flexGrow: 1 }} />
+          <Button color="inherit" onClick={handleLogout} sx={{ mr: 2 }}>
+            Logout
+          </Button>
           <Avatar sx={{ bgcolor: '#8884d8' }}>U</Avatar>
         </Toolbar>
       </AppBar>

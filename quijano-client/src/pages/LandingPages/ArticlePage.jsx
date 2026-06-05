@@ -1,12 +1,49 @@
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Button from '../../components/Button.jsx';
-import { articles } from '../../assets/articles.js';
+import { fetchArticles } from '../../services/ArticleService';
 
 function ArticlePage() {
   const { name } = useParams();
-  const article = articles.find(article => article.name === name);
+  const [article, setArticle] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
-  if (!article) {
+  useEffect(() => {
+    const loadArticle = async () => {
+      try {
+        const response = await fetchArticles();
+        const found = response.data.articles.find((item) => item.name === name);
+        if (!found) {
+          setNotFound(true);
+        } else {
+          setArticle(found);
+          setNotFound(false);
+        }
+      } catch (error) {
+        console.error('Failed to load article:', error);
+        setNotFound(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadArticle();
+  }, [name]);
+
+  if (loading) {
+    return (
+      <div className="flex w-full flex-col gap-6">
+        <section className="border-y-2 border-zinc-900 bg-zinc-50 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <div className="mx-auto max-w-3xl">
+            <h1 className="text-3xl font-bold text-zinc-900">Loading article...</h1>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  if (notFound || !article) {
     return (
       <div className="flex w-full flex-col gap-6">
         <section className="border-y-2 border-zinc-900 bg-zinc-50 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
