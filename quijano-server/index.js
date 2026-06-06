@@ -11,7 +11,9 @@ const articleRoutes = require("./routes/articleRoutes");
 const app = express();
 
 // Database Connection
-connectDB();
+connectDB().catch((error) => {
+    console.error('Failed to connect to MongoDB:', error.message);
+});
 
 app.use(express.json());
 
