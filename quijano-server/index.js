@@ -51,6 +51,10 @@ app.use((req, res, next) => {
 app.use("/api/users", userRoutes);
 app.use("/api/articles", articleRoutes);
 
+app.get('/', (req, res) => {
+    res.send('API is live');
+});
+
 // Error Handling
 app.use((err, req, res, next) => {
     console.error(err.stack);
